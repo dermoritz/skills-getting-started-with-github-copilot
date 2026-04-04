@@ -4,6 +4,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderParticipantsList(participants) {
+    if (!participants.length) {
+      return '<li class="participant-empty">No participants yet</li>';
+    }
+
+    return participants
+      .map((participant) => `<li>${escapeHtml(participant)}</li>`)
+      .join("");
+  }
+
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
@@ -19,12 +38,21 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
+        const participantsCount = details.participants.length;
 
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <p class="participants-title">
+              <strong>Participants:</strong> ${participantsCount}/${details.max_participants}
+            </p>
+            <ul class="participants-list">
+              ${renderParticipantsList(details.participants)}
+            </ul>
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
